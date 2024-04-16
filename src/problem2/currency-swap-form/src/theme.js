@@ -11,9 +11,7 @@ const theme = extendTheme({
   palette: {
     main: {
       default: '#fff',
-      background: '#E7F0EF',
-      swapBtn: '#86A789',
-      clearBtn: '#86A789'
+      background: '#006989'
     }
   }
 })
