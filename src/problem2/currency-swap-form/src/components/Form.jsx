@@ -1,5 +1,16 @@
 import { useState, useEffect } from 'react'
-import { FormControl, Typography, InputLabel, TextField, MenuItem, Select, Button, Grid, Box } from '@mui/material'
+import {
+  FormControl,
+  Typography,
+  InputLabel,
+  TextField,
+  MenuItem,
+  Select,
+  Button,
+  Grid,
+  Box,
+  Avatar
+} from '@mui/material'
 import { fetchCurrencies } from '../apis/index'
 
 function CurrencySwapForm() {
@@ -11,25 +22,79 @@ function CurrencySwapForm() {
   const [inputAmount, setInputAmount] = useState('')
   const [outputAmount, setOutputAmount] = useState('')
 
+  const [inputError, setInputError] = useState('')
+  const [fromCurrencyError, setFromCurrencyError] = useState(false)
+  const [toCurrencyError, setToCurrencyError] = useState(false)
+
   useEffect(() => {
     async function fetchData() {
-      const data = await fetchCurrencies()
+      let data = await fetchCurrencies()
+      data = addCustomIcons(data)
       setCurrencies(data)
+      console.log(data)
     }
     fetchData()
   }, [])
 
-  const currencySwap = (e) => {
-    console.log('currencySwap')
-
-    e.preventDefault()
-    const fromPrice = currencies.find((currency) => currency.currency === fromCurrency)?.price
-
-    const toPrice = currencies.find((currency) => currency.currency === toCurrency)?.price
-
-    if (!fromPrice || !toPrice) {
-      alert('Please select option before!')
+  // Add other token icons missing
+  const addCustomIcons = (data) => {
+    const customIcons = {
+      RATOM: 'https://raw.githubusercontent.com/Switcheo/token-icons/main/tokens/rATOM.svg',
+      STEVMOS: 'https://raw.githubusercontent.com/Switcheo/token-icons/main/tokens/stEVMOS.svg',
+      STOSMO: 'https://raw.githubusercontent.com/Switcheo/token-icons/main/tokens/stOSMO.svg',
+      STATOM: 'https://raw.githubusercontent.com/Switcheo/token-icons/main/tokens/stATOM.svg',
+      STLUNA: 'https://raw.githubusercontent.com/Switcheo/token-icons/main/tokens/stLUNA.svg'
     }
+
+    const newData = data.map((item) => {
+      if (customIcons[item.currency]) {
+        return {
+          ...item,
+          iconURL: customIcons[item.currency]
+        }
+      } else {
+        return item
+      }
+    })
+
+    return newData
+  }
+
+  const validateInputs = () => {
+    let isValid = true
+
+    if (!fromCurrency) {
+      setFromCurrencyError('Required *')
+      isValid = false
+    } else {
+      setFromCurrencyError('')
+    }
+
+    if (!toCurrency) {
+      setToCurrencyError('Required *')
+      isValid = false
+    } else {
+      setToCurrencyError('')
+    }
+
+    if (!inputAmount || isNaN(inputAmount)) {
+      setInputError('Required *')
+      isValid = false
+    } else {
+      setInputError('')
+    }
+
+    return isValid
+  }
+
+  const currencySwap = (e) => {
+    e.preventDefault()
+    if (!validateInputs()) {
+      return
+    }
+
+    const fromPrice = currencies.find((currency) => currency.currency === fromCurrency)?.price
+    const toPrice = currencies.find((currency) => currency.currency === toCurrency)?.price
 
     const exchangeRates = toPrice / fromPrice
     const result = (inputAmount * exchangeRates).toFixed(2)
@@ -43,6 +108,10 @@ function CurrencySwapForm() {
     setToCurrency('')
     setInputAmount('')
     setOutputAmount('')
+
+    setFromCurrencyError(false)
+    setToCurrencyError(false)
+    setInputError('')
   }
 
   return (
@@ -75,11 +144,13 @@ function CurrencySwapForm() {
               Fancy Form
             </Typography>
           </Grid>
-          {/* Main box */}
+
+          {/* Swap currency area */}
           <Grid item xs={12}>
             <Grid container spacing={2} justifyContent="center">
               <Grid item xs={12} md={6}>
                 <FormControl
+                  error={fromCurrencyError}
                   sx={{
                     width: '160px'
                   }}
@@ -95,14 +166,25 @@ function CurrencySwapForm() {
                   >
                     {currencies.map((currency, index) => (
                       <MenuItem key={index} value={currency.currency}>
-                        {currency.currency}
+                        <Grid container spacing={1} alignItems="center">
+                          <Grid item>
+                            <Avatar src={currency.iconURL} />
+                          </Grid>
+                          <Grid item>{currency.currency}</Grid>
+                        </Grid>
                       </MenuItem>
                     ))}
                   </Select>
+                  {fromCurrencyError && (
+                    <Typography sx={{ textAlign: 'left', fontSize: '0.8rem' }} color="error">
+                      {fromCurrencyError}
+                    </Typography>
+                  )}
                 </FormControl>
               </Grid>
               <Grid item xs={12} md={6}>
                 <FormControl
+                  error={toCurrencyError}
                   sx={{
                     width: '160px'
                   }}
@@ -117,25 +199,36 @@ function CurrencySwapForm() {
                   >
                     {currencies.map((currency, index) => (
                       <MenuItem key={index} value={currency.currency}>
-                        {currency.currency}
+                        <Grid container spacing={1} alignItems="center">
+                          <Grid item>
+                            <Avatar src={currency.iconURL} />
+                          </Grid>
+                          <Grid item>{currency.currency}</Grid>
+                        </Grid>
                       </MenuItem>
                     ))}
                   </Select>
+                  {toCurrencyError && (
+                    <Typography sx={{ textAlign: 'left', fontSize: '0.8rem' }} color="error">
+                      {toCurrencyError}
+                    </Typography>
+                  )}
                 </FormControl>
               </Grid>
             </Grid>
           </Grid>
-          {/* Textfield box */}
           <Grid item xs={12}>
             <Grid container spacing={2} justifyContent="center">
               <Grid item xs={12} md={4}>
                 <TextField
                   sx={{ width: '160px' }}
                   id="input-amount"
-                  label="Amount to send"
+                  label="Amount"
                   value={inputAmount}
                   onChange={(e) => setInputAmount(e.target.value)}
                   placeholder="Type here..."
+                  error={Boolean(inputError)}
+                  helperText={inputError}
                 />
               </Grid>
               <Grid
@@ -155,7 +248,8 @@ function CurrencySwapForm() {
               </Grid>
             </Grid>
           </Grid>
-          {/* Button box */}
+
+          {/* Button area */}
           <Grid item xs={12} sx={{ marginTop: '3rem' }}>
             <Grid container spacing={2} justifyContent="center">
               <Grid item xs={6} md={3}>
