@@ -1,7 +1,10 @@
+import CurrencySwapForm from "./components/Form.jsx";
+import "./App.css";
+
 function App() {
   return (
     <div className="App">
-      <h1>Fancy form</h1>
+      <CurrencySwapForm />
     </div>
   );
 }
