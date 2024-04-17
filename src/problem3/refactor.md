@@ -2,9 +2,11 @@
 
 ## Import library and Component
 
-`import React, { useMemo } from "react";
+```
+import React, { useMemo } from "react";
 import { useWalletBalances, usePrices } from "./hooks/mockHooks";
-import { WalletRow } from "./components/WalletRow";`
+import { WalletRow } from "./components/WalletRow";
+```
 
 ## Missing property
 
@@ -12,82 +14,142 @@ Refactor: `blockchain: string`
 
 ## Redeclare the property
 
-Initial: `interface WalletBalance {
-currency: string;
-amount: number;
+Initial:
+
+```
+interface WalletBalance {
+    currency: string;
+    amount: number;
 }
+```
 
+```
 interface FormattedWalletBalance {
-currency: string;
-amount: number;
-formatted: string;
-}`
+    currency: string;
+    amount: number;
+    formatted: string;
+}
+```
 
-Refactor: `interface WalletBalance {
+Refactor:
+
+```
+interface WalletBalance {
   currency: string;
   amount: number;
   blockchain: string;
 }
+```
+
+```
 interface FormattedWalletBalance {
   formatted: string;
-}`
+}
+```
 
 ## BoxProps not use
 
-delete it
+`delete it`
 
 ## Type of blockchain
 
-Initial: `const getPriority = (blockchain: any): number => {}`
-Refactor: `const getPriority = (blockchain: string): number => {}`
+Initial:
+
+```
+const getPriority = (blockchain: any): number => {}
+```
+
+Refactor:
+
+```
+const getPriority = (blockchain: string): number => {}
+```
 
 ## Combined same priority blockchains in getPriority()
 
-Initial: `      case "Zilliqa":
-        return 20;
-      case "Neo":
-        return 20;`
+Initial:
 
-Refactor: `      case "Zilliqa":
-      case "Neo":
-        return 20;`
+```
+case "Zilliqa":
+    return 20;
+case "Neo":
+    return 20;
+```
+
+s
+Refactor:
+
+```
+case "Zilliqa":
+    case "Neo":
+    return 20;
+```
 
 ## Wrong use variable in statement
 
-Initial: `        const balancePriority = getPriority(balance.blockchain);
+Initial:
+
+```
+const balancePriority = getPriority(balance.blockchain);
         if (lhsPriority > -99) {
           if (balance.amount <= 0) {
             return true;
           }
-        }`
+        }
+```
 
-Refactor: `        const balancePriority = getPriority(balance.blockchain);
+Refactor:
+
+```
+const balancePriority = getPriority(balance.blockchain);
         if (balancePriority > -99) {
           if (balance.amount <= 0) {
             return true;
           }
-        }`
+        }
+```
 
 ## Handle case where priorities are equal
 
-Initial: `if (leftPriority > rightPriority) {
-          return -1;
-        } else if (rightPriority > leftPriority) {
-          return 1;
-        }`
+Initial:
 
-Refactor: `if (leftPriority > rightPriority) {
+```
+if (leftPriority > rightPriority) {
           return -1;
         } else if (rightPriority > leftPriority) {
           return 1;
-        } 
-        return 0;`
+        }
+```
+
+Refactor:
+
+```
+if (leftPriority > rightPriority) {
+          return -1;
+        } else if (rightPriority > leftPriority) {
+          return 1;
+        }
+        return 0;
+```
 
 ## Wrong use function in statement
 
-Initial: `const rows = sortedBalances.map()`
-Refactor: `const rows = formattedBalances.map()`
+Initial:
+
+```
+const rows = sortedBalances.map()
+```
+
+Refactor:
+
+```
+const rows = formattedBalances.map()
+```
 
 ## Export component
 
-Refactor: `export default WalletPage;`
+Refactor:
+
+```
+export default WalletPage;
+```
